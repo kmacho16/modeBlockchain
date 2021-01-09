@@ -6,6 +6,9 @@ from flask import Flask, jsonify, request
 import shelve
 from block import Block
 from store import StoreController
+from flask_bcrypt import Bcrypt
+
+bcrypt = Bcrypt()
 
 
 class Blockchain(StoreController):
@@ -67,6 +70,34 @@ class Blockchain(StoreController):
     def isValidProof(self, block, proof):
         return (proof.startswith('0' * Blockchain.difficulty) and
                 proof == block.computedHash())
+
+    def uidExist(self, auth):
+        for element in self.chain:
+            for transaction in element.transactions:
+                if not transaction['uid'] is None:
+                    if auth['uid'] == transaction['uid']:
+                        return {"continue": True, "message": element.hash + ":" + auth['uid']}
+        return {"continue": False}
+
+    def validateCredentials(self, transaction, auth):
+        checkPass = bcrypt.check_password_hash(
+            transaction['password'], auth['password'])
+        if (checkPass and auth['username'] == transaction['username']):
+            return True
+        return False
+
+    '''
+    Validar la necesidad de actualizar un registro antes de ser minado 
+    def validatePendingTransaction(self, auth):
+        for pending in self.getTransactionsStored():
+            if pending['uid'] == auth['uid']:
+                pending['username'] = auth['username']
+                pending['email'] = auth['email']
+                pending['password'] = bcrypt.generate_password_hash(
+                    auth["password"])
+                pending['timestamp'] = time.time()
+                return True
+        return False'''
 
     @property
     def lastBlock(self):

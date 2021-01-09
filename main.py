@@ -11,6 +11,7 @@ import datetime
 from functools import wraps
 from utils import create_chain_from_dump, addPeers, updatePeers, token_required
 import jwt
+from flask_bcrypt import Bcrypt
 
 try:
     from urllib.parse import urlparse
@@ -20,6 +21,7 @@ except ImportError:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '3st03sS3cr3t0'
 CORS(app)
+bcrypt = Bcrypt(app)
 blockchain = Blockchain()
 
 
@@ -38,9 +40,18 @@ def new_transaction():
 
 @app.route('/login', methods=['POST'])
 def login():
-    token = jwt.encode({'public_id': 'ahahahhaa', 'exp': datetime.datetime.utcnow(
-    ) + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-    return jsonify({'token': token.decode('UTF-8')})
+    mRequest = request.get_json()
+    required_fields = ['username', 'password', 'uid']
+    for field in required_fields:
+        if not mRequest.get(field):
+            return "Invalid transaction data", 404
+    response = blockchain.uidExist(mRequest)
+    if(response['continue']):
+        token = jwt.encode({'public_id': response['message'], 'exp': datetime.datetime.utcnow(
+        ) + datetime.timedelta(minutes=180)}, app.config['SECRET_KEY'])
+        return jsonify({'token': token.decode('UTF-8')})
+    else:
+        return jsonify({'continue': False, 'message': 'Credenciales incorrectas o dispositivo no registrado'})
 
 
 @app.route('/get-data', methods=['GET'])
@@ -49,7 +60,7 @@ def getData(current_user):
     return jsonify({'message': current_user})
 
 
-@app.route('/new_transaction/register', methods=['POST'])
+@app.route('/register/user', methods=['POST'])
 def new_user_register():
     tx_data = request.get_json()
     required_fields = ["username", "email", "password", "uid"]
@@ -57,6 +68,8 @@ def new_user_register():
         if not tx_data.get(field):
             return "Invalid transaction data", 404
     tx_data["timestamp"] = time.time()
+    tx_data["password"] = bcrypt.generate_password_hash(tx_data["password"])
+    tx_data['active'] = True
     blockchain.addNewTransaction(tx_data)
     response = jsonify(status="ok")
     return response, 200
@@ -83,8 +96,6 @@ def mine_unconfirmed_transactions():
 @app.route('/pending_tx')
 def get_pending_tx():
     return jsonify(blockchain.unconfirmedTransaction), 200
-
-# Endpoint to add new peers to the network
 
 
 @app.route('/register_node', methods=['POST'])
