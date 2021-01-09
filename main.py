@@ -93,6 +93,19 @@ def mine_unconfirmed_transactions():
     return "Block #{} is mined.".format(result)
 
 
+@app.route('/last/hash', methods=['GET'])
+def getLastHash():
+    exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
+    return jsonify({"message": blockchain.lastBlock.hash+":"+exp.strftime("%x")}), 200
+
+
+@app.route('/validate/<mHash>', methods=['GET'])
+def validateHash(mHash):
+    if(blockchain.lastBlock.hash == mHash):
+        return jsonify({"continue": True, "message": "Hash validado correctamente"})
+    return jsonify({"continue": False, "message": "Hash no valido "})
+
+
 @app.route('/pending_tx')
 def get_pending_tx():
     return jsonify(blockchain.unconfirmedTransaction), 200
