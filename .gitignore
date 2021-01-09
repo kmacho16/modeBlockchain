@@ -1,4 +1,6 @@
-blocks.ud
-blockchain.pyc
 *.pyc
 *.ud
+venv/
+.vscode/
+blocks.ud
+blockchain.pyc
