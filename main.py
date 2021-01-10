@@ -9,7 +9,7 @@ from blockchain import Blockchain
 from flask_cors import CORS
 import datetime
 from functools import wraps
-from utils import create_chain_from_dump, addPeers, updatePeers, token_required
+from utils import create_chain_from_dump, addPeers, updatePeers, token_required, validateRecords
 import jwt
 from flask_bcrypt import Bcrypt
 
@@ -45,7 +45,8 @@ def login():
     for field in required_fields:
         if not mRequest.get(field):
             return "Invalid transaction data", 404
-    response = blockchain.uidExist(mRequest)
+    response = validateRecords(blockchain.uidExist(mRequest))
+
     if(response['continue']):
         token = jwt.encode({'public_id': response['message'], 'exp': datetime.datetime.utcnow(
         ) + datetime.timedelta(minutes=180)}, app.config['SECRET_KEY'])
@@ -62,15 +63,19 @@ def getData(current_user):
 
 @app.route('/register/user', methods=['POST'])
 def new_user_register():
-    tx_data = request.get_json()
+    authData = request.get_json()
     required_fields = ["username", "email", "password", "uid"]
     for field in required_fields:
-        if not tx_data.get(field):
+        if not authData.get(field):
             return "Invalid transaction data", 404
-    tx_data["timestamp"] = time.time()
-    tx_data["password"] = bcrypt.generate_password_hash(tx_data["password"])
-    tx_data['active'] = True
-    blockchain.addNewTransaction(tx_data)
+    authData["timestamp"] = time.time()
+    authData["password"] = bcrypt.generate_password_hash(authData["password"])
+    authData['active'] = True
+    pending = blockchain.validatePendingTransaction(authData)
+    if(pending['exist']):
+        pending['transaction']['active'] = False
+        blockchain.addNewTransaction(pending['transaction'])
+    blockchain.addNewTransaction(authData)
     response = jsonify(status="ok")
     return response, 200
 

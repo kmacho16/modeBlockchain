@@ -72,12 +72,14 @@ class Blockchain(StoreController):
                 proof == block.computedHash())
 
     def uidExist(self, auth):
+        records = set()
         for element in self.chain:
             for transaction in element.transactions:
                 if not transaction['uid'] is None:
                     if auth['uid'] == transaction['uid']:
-                        return {"continue": True, "message": element.hash + ":" + auth['uid']}
-        return {"continue": False}
+                        records.add(
+                            {'node': element.hash, 'transaction': transaction})
+        return records
 
     def validateCredentials(self, transaction, auth):
         checkPass = bcrypt.check_password_hash(
@@ -86,18 +88,11 @@ class Blockchain(StoreController):
             return True
         return False
 
-    '''
-    Validar la necesidad de actualizar un registro antes de ser minado 
     def validatePendingTransaction(self, auth):
         for pending in self.getTransactionsStored():
             if pending['uid'] == auth['uid']:
-                pending['username'] = auth['username']
-                pending['email'] = auth['email']
-                pending['password'] = bcrypt.generate_password_hash(
-                    auth["password"])
-                pending['timestamp'] = time.time()
-                return True
-        return False'''
+                return {'exist': True, "transaction": pending}
+        return {'exist': False}
 
     @property
     def lastBlock(self):

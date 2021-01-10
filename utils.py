@@ -80,6 +80,17 @@ def updatePeers(address):
     peers.update(address)
 
 
+def validateRecords(records):
+    response = {'continue': False}
+    for record in records:
+        if record['transaction']['active']:
+            response = {"continue": True,
+                        "message": record['node'] + ":" + record['transaction']['uid']}
+        else:
+            response = {'continue': False}
+    return response
+
+
 def token_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
