@@ -5,6 +5,10 @@ from blockchain import Blockchain
 import json
 from functools import wraps
 import jwt
+from flask_bcrypt import Bcrypt
+
+bcrypt = Bcrypt()
+
 SECRET_KEY = '3st03sS3cr3t0'
 peers = set()
 CONNECTED_NODE_ADDRESS = "http://127.0.0.1:8000"
@@ -55,7 +59,7 @@ def announce_new_block(block):
 
 
 def create_chain_from_dump(chain_dump):
-    blockchain = BlockChain()
+    #blockchain = BlockChain()
     for idx, block_data in enumerate(chain_dump):
         block = Block(block_data["index"],
                       block_data["transactions"],
@@ -80,15 +84,22 @@ def updatePeers(address):
     peers.update(address)
 
 
-def validateRecords(records):
+def validateRecords(record):
     response = {'continue': False}
-    for record in records:
-        if record['transaction']['active']:
-            response = {"continue": True,
-                        "message": record['node'] + ":" + record['transaction']['uid']}
-        else:
-            response = {'continue': False}
+    if record['active']:
+        response = {"continue": True,
+                    "message": record['node'] + ":" + record['transaction']['uid']}
+    else:
+        response = {'continue': False}
     return response
+
+
+def validateCredentials(transaction, auth):
+    checkPass = bcrypt.check_password_hash(
+        transaction['password'], auth['password'])
+    if (checkPass and auth['username'] == transaction['username']):
+        return True
+    return False
 
 
 def token_required(f):

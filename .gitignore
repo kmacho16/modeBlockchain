@@ -1,6 +1,3 @@
 *.pyc
 *.ud
 venv/
-.vscode/
-blocks.ud
-blockchain.pyc
