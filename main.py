@@ -50,7 +50,7 @@ def login():
     if(response['continue'] and validateCredentials(lastTransaction['transaction'], authData)):
         token = jwt.encode({'public_id': response['message'], 'exp': datetime.datetime.utcnow(
         ) + datetime.timedelta(minutes=180)}, app.config['SECRET_KEY'])
-        return jsonify({'token': token.decode('UTF-8')})
+        return jsonify({'continue': True, 'token': token.decode('UTF-8')})
     else:
         return jsonify({'continue': False, 'message': 'Credenciales incorrectas o dispositivo no registrado'})
 

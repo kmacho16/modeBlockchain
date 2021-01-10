@@ -86,7 +86,7 @@ def updatePeers(address):
 
 def validateRecords(record):
     response = {'continue': False}
-    if record['active']:
+    if 'active' in record and record['active']:
         response = {"continue": True,
                     "message": record['node'] + ":" + record['transaction']['uid']}
     else:
