@@ -4,12 +4,9 @@ from block import Block
 from blockchain import Blockchain
 import json
 from functools import wraps
+from raspi import Raspi
 import jwt
 from flask_bcrypt import Bcrypt
-try:
-    import RPi.GPIO as GPIO
-except:
-    import FakeRPi.GPIO as GPIO
 
 bcrypt = Bcrypt()
 
@@ -17,13 +14,9 @@ SECRET_KEY = '3st03sS3cr3t0'
 peers = set()
 CONNECTED_NODE_ADDRESS = "http://127.0.0.1:8000"
 blockchain = Blockchain()
-GPIO.setmode(GPIO.BCM)
 
-led = 13
-ledStatus = 0
 
-GPIO.setup(led, GPIO.OUT)
-GPIO.output(led, GPIO.LOW)
+yellowLed = Raspi(13, "LedPrincipal")
 
 
 def consensus():
@@ -64,13 +57,11 @@ def fetch_posts():
 
 
 def turnOnLed():
-    GPIO.output(led, GPIO.HIGH)
-    print("LED ENCENDIDO")
+    yellowLed.changeOutPin(True)
 
 
 def turnOffled():
-    GPIO.output(led, GPIO.LOW)
-    print("LED APAGADO")
+    yellowLed.changeOutPin(False)
 
 
 def announce_new_block(block):

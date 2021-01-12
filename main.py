@@ -59,18 +59,17 @@ def login():
 @app.route('/get-data', methods=['GET'])
 @token_required
 def getData(current_user):
-    print("LED APAGADO")
     return jsonify({'message': current_user})
 
 
 @app.route('/change_led_status/<int:status>', methods=['POST'])
 @token_required
-def changeLedStatus(current_user,status):
+def changeLedStatus(current_user, status):
     if(status == 1):
         turnOnLed()
     else:
         turnOffled()
-    return jsonify({"message":"estado cambiado"})
+    return jsonify({"message": "estado cambiado"})
 
 
 @app.route('/register/user', methods=['POST'])
