@@ -6,7 +6,10 @@ import json
 from functools import wraps
 import jwt
 from flask_bcrypt import Bcrypt
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except:
+    import FakeRPi.GPIO as GPIO
 
 bcrypt = Bcrypt()
 
@@ -19,8 +22,9 @@ GPIO.setmode(GPIO.BCM)
 led = 13
 ledStatus = 0
 
-GPIO.setup(led,GPIO.OUT)
-GPIO.output(led,GPIO.LOW)
+GPIO.setup(led, GPIO.OUT)
+GPIO.output(led, GPIO.LOW)
+
 
 def consensus():
     global blockchain
@@ -57,13 +61,17 @@ def fetch_posts():
         posts = sorted(content,
                        key=lambda k: k['timestamp'],
                        reverse=True)
+
+
 def turnOnLed():
-    GPIO.output(led,GPIO.HIGH)
+    GPIO.output(led, GPIO.HIGH)
     print("LED ENCENDIDO")
 
+
 def turnOffled():
-    GPIO.output(led,GPIO.LOW)
+    GPIO.output(led, GPIO.LOW)
     print("LED APAGADO")
+
 
 def announce_new_block(block):
     for peer in peers:
