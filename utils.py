@@ -56,12 +56,18 @@ def fetch_posts():
                        reverse=True)
 
 
-def turnOnLed():
+def activatePin():
     yellowLed.changeOutPin(True)
+    return ({"uuid": yellowLed.uuid,
+             "name": yellowLed.uuid,
+             "state": "activate"})
 
 
-def turnOffled():
+def deactivatePin():
     yellowLed.changeOutPin(False)
+    return ({"uuid": yellowLed.uuid,
+             "name": yellowLed.uuid,
+             "state": "deactivate"})
 
 
 def announce_new_block(block):
@@ -100,7 +106,7 @@ def validateRecords(record):
     response = {'continue': False}
     if 'active' in record and record['active']:
         response = {"continue": True,
-                    "message": record['node'] + ":" + record['transaction']['uid']}
+                    "message": record['node'] + ":" + record['transaction']['uid'] + ":" + record['transaction']['username']}
     else:
         response = {'continue': False}
     return response

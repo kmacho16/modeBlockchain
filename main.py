@@ -9,7 +9,7 @@ from blockchain import Blockchain
 from flask_cors import CORS
 import datetime
 from functools import wraps
-from utils import turnOffled, create_chain_from_dump, turnOnLed, addPeers, updatePeers, token_required, validateRecords, validateCredentials
+from utils import create_chain_from_dump, activatePin, deactivatePin, addPeers, updatePeers, token_required, validateRecords, validateCredentials
 import jwt
 from flask_bcrypt import Bcrypt
 
@@ -40,7 +40,6 @@ def new_transaction():
 
 @app.route('/login', methods=['POST'])
 def login():
-    turnOnLed()
     authData = request.get_json()
     required_fields = ['username', 'password', 'uid']
     for field in required_fields:
@@ -65,11 +64,15 @@ def getData(current_user):
 @app.route('/change_led_status/<int:status>', methods=['POST'])
 @token_required
 def changeLedStatus(current_user, status):
+    node, uid, username = current_user.split(":")
     if(status == 1):
-        turnOnLed()
+        action = activatePin()
     else:
-        turnOffled()
-    return jsonify({"message": "estado cambiado"})
+        action = deactivatePin()
+    data = {"uid": uid, "username": username, "action": action}
+    data["timestamp"] = time.time()
+    blockchain.addNewTransaction(data)
+    return jsonify({"continue": True, "message": "Interaccion registrada"})
 
 
 @app.route('/register/user', methods=['POST'])
