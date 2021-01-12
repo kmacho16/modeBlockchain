@@ -11,7 +11,7 @@ class Raspi(object):
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(outPin, GPIO.OUT)
         self.outPin = outPin
-        self.uuid = uuid.uuid4()
+        self.uuid = str(uuid.uuid4())
         self.name = name
         #GPIO.setup(SENSOR_PIN, GPIO.IN)
 

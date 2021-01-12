@@ -59,14 +59,14 @@ def fetch_posts():
 def activatePin():
     yellowLed.changeOutPin(True)
     return ({"uuid": yellowLed.uuid,
-             "name": yellowLed.uuid,
+             "name": yellowLed.name,
              "state": "activate"})
 
 
 def deactivatePin():
     yellowLed.changeOutPin(False)
     return ({"uuid": yellowLed.uuid,
-             "name": yellowLed.uuid,
+             "name": yellowLed.name,
              "state": "deactivate"})
 
 

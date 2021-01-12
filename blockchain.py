@@ -72,7 +72,7 @@ class Blockchain(StoreController):
         record = {'exist': False}
         for element in self.getBlockChain():
             for transaction in element.transactions:
-                if not transaction['uid'] is None:
+                if not transaction['uid'] is None and  'active' in transaction:
                     if auth['uid'] == transaction['uid']:
                         record = {
                             'exist': True,
