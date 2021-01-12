@@ -9,7 +9,7 @@ from blockchain import Blockchain
 from flask_cors import CORS
 import datetime
 from functools import wraps
-from utils import create_chain_from_dump, addPeers, updatePeers, token_required, validateRecords, validateCredentials
+from utils import turnOffled, create_chain_from_dump,turnOnLed, addPeers, updatePeers, token_required, validateRecords, validateCredentials
 import jwt
 from flask_bcrypt import Bcrypt
 
@@ -40,6 +40,7 @@ def new_transaction():
 
 @app.route('/login', methods=['POST'])
 def login():
+    turnOnLed()
     authData = request.get_json()
     required_fields = ['username', 'password', 'uid']
     for field in required_fields:
@@ -58,6 +59,8 @@ def login():
 @app.route('/get-data', methods=['GET'])
 @token_required
 def getData(current_user):
+    turnOffled()
+    print("LED APAGADO")
     return jsonify({'message': current_user})
 
 
