@@ -2,14 +2,15 @@ import shelve
 from block import Block
 
 
-class StoreController:
+class StoreController(object):
 
-    transaction = 'transactions.ud'
-    chain = 'blocks.ud'
-    peers = 'peers.ud'
+    def __init__(self, transactionFile, chainFile, peersFile):
+        self.transactionFile = transactionFile
+        self.chainFile = chainFile
+        self.peersFile = peersFile
 
     def getTransactionsStored(self):
-        transactions = shelve.open(StoreController.transaction)
+        transactions = shelve.open(self.transactionFile)
         pendingTransactions = []
         try:
             if 'pending' in transactions:
@@ -21,7 +22,7 @@ class StoreController:
         return pendingTransactions
 
     def addTransactionsStored(self, transaction):
-        transactions = shelve.open(StoreController.transaction)
+        transactions = shelve.open(self.transactionFile)
         try:
             if 'pending' in transactions:
                 pendingTransactions = transactions['pending']
@@ -35,7 +36,7 @@ class StoreController:
         return pendingTransactions
 
     def delTransactionsStored(self):
-        transactions = shelve.open(StoreController.transaction)
+        transactions = shelve.open(self.transactionFile)
         try:
             if 'pending' in transactions:
                 del transactions['pending']
@@ -44,7 +45,7 @@ class StoreController:
         return []
 
     def getBlockChain(self):
-        blocks = shelve.open(StoreController.chain)
+        blocks = shelve.open(self.chainFile)
         blockchain = None
         try:
             if 'blocks' in blocks:
@@ -56,14 +57,14 @@ class StoreController:
         return blockchain
 
     def setBlockStored(self, mChain):
-        blocks = shelve.open(StoreController.chain)
+        blocks = shelve.open(self.chainFile)
         try:
             blocks['blocks'] = mChain
         finally:
             blocks.close()
 
     def isBlockSet(self):
-        blocks = shelve.open(StoreController.chain)
+        blocks = shelve.open(self.chainFile)
         result = False
         try:
             if 'blocks' in blocks:

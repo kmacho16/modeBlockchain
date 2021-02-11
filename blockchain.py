@@ -11,7 +11,9 @@ from store import StoreController
 class Blockchain(StoreController):
     difficulty = 2
 
-    def __init__(self):
+    def __init__(self, transactionFile='transactions.ud', chainFile='blocks.ud', peersFile='peers.ud'):
+        super(Blockchain, self).__init__(
+            transactionFile, chainFile, peersFile)
         self.unconfirmedTransaction = self.getTransactionsStored()
         self.chain = []
         self.createGenesisBlock()
@@ -72,7 +74,7 @@ class Blockchain(StoreController):
         record = {'exist': False}
         for element in self.getBlockChain():
             for transaction in element.transactions:
-                if not transaction['uid'] is None and  'active' in transaction:
+                if not transaction['uid'] is None and 'active' in transaction:
                     if auth['uid'] == transaction['uid']:
                         record = {
                             'exist': True,

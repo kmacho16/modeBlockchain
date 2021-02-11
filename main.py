@@ -23,6 +23,7 @@ app.config['SECRET_KEY'] = '3st03sS3cr3t0'
 CORS(app)
 bcrypt = Bcrypt(app)
 blockchain = Blockchain()
+devicesBlockchain = Blockchain("devices.ud", "tdevices.ud")
 
 
 @app.route('/new_transaction', methods=['POST'])
@@ -35,6 +36,15 @@ def new_transaction():
     tx_data["timestamp"] = time.time()
     blockchain.addNewTransaction(tx_data)
     response = jsonify(username=tx_data["username"])
+    return response, 200
+
+
+@app.route('/devices/new_transaction', methods=['POST'])
+def devices_new_transactions():
+    data = request.get_json()
+    data['timestamp'] = time.time()
+    devicesBlockchain.addNewTransaction(data)
+    response = jsonify(status="continue")
     return response, 200
 
 
@@ -135,6 +145,11 @@ def get_pending_tx():
     return jsonify(blockchain.unconfirmedTransaction), 200
 
 
+@app.route('/devices/pending_tx')
+def get_dev_pending_tx():
+    return jsonify(devicesBlockchain.unconfirmedTransaction), 200
+
+
 @app.route('/register_node', methods=['POST'])
 def register_new_peers():
     # The host address to the peer node
@@ -144,6 +159,13 @@ def register_new_peers():
 
     addPeers(node_address)
     return get_chain()
+
+
+@app.route('/devices', methods=['get'])
+def getDevices():
+    devices = [{"id": "8f019343-15ee-4530-9e32-6f5cfd0665c0", "name": "Led Principal"},
+               {"id": "7c39379a-1421-43f8-a341-0a5150138cc6", "name": "Led Secundario"}]
+    return jsonify({"continue": True, "devices": devices})
 
 
 @app.route('/register_with', methods=['POST'])
