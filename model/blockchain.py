@@ -4,8 +4,8 @@ import time
 import requests
 from flask import Flask, jsonify, request
 import shelve
-from block import Block
-from store import StoreController
+from model.block import Block
+from utils.store import StoreController
 
 
 class Blockchain(StoreController):

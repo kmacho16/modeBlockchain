@@ -1,7 +1,7 @@
 import requests
 from flask import jsonify, request
-from block import Block
-from blockchain import Blockchain
+from model.block import Block
+from model.blockchain import Blockchain
 import json
 from functools import wraps
 from raspi import Raspi

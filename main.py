@@ -2,15 +2,15 @@ from hashlib import sha256
 import json
 import time
 import requests
-from flask import Flask, jsonify, request
 import shelve
-from block import Block
-from blockchain import Blockchain
+import jwt
+from flask import Flask, jsonify, request
+from model.block import Block
+from model.blockchain import Blockchain
 from flask_cors import CORS
 import datetime
 from functools import wraps
-from utils import create_chain_from_dump, activatePin, deactivatePin, addPeers, updatePeers, token_required, validateRecords, validateCredentials
-import jwt
+from utils.utils import create_chain_from_dump, activatePin, deactivatePin, addPeers, updatePeers, token_required, validateRecords, validateCredentials
 from flask_bcrypt import Bcrypt
 
 try:

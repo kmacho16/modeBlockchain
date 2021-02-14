@@ -1,13 +1,13 @@
 import shelve
-from block import Block
+from model.block import Block
 
 
 class StoreController(object):
 
     def __init__(self, transactionFile, chainFile, peersFile):
-        self.transactionFile = transactionFile
-        self.chainFile = chainFile
-        self.peersFile = peersFile
+        self.transactionFile = ("data/%s" % transactionFile)
+        self.chainFile = ("data/%s" % chainFile)
+        self.peersFile = ("data/%s" % peersFile)
 
     def getTransactionsStored(self):
         transactions = shelve.open(self.transactionFile)
