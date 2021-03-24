@@ -7,6 +7,7 @@ import jwt
 from flask import Flask, jsonify, request
 from model.block import Block
 from model.blockchain import Blockchain
+from model.peer import Peer
 from flask_cors import CORS
 import datetime
 from functools import wraps
@@ -152,13 +153,16 @@ def get_dev_pending_tx():
 
 @app.route('/register_node', methods=['POST'])
 def register_new_peers():
-    # The host address to the peer node
-    node_address = request.get_json()["node_address"]
-    if not node_address:
+    node = request.get_json()
+    if not node:
         return "Invalid data", 400
+    blockchain.addPeersStored(node)
+    return jsonify(blockchain.getPeersStored()), 200
 
-    addPeers(node_address)
-    return get_chain()
+
+@app.route("/peers", methods=['GET'])
+def getPeers():
+    return jsonify(blockchain.getPeersStored()), 200
 
 
 @app.route('/devices', methods=['get'])
@@ -173,9 +177,11 @@ def register_with_existing_node():
     nodeAddress = request.get_json()["node_address"]
     if not nodeAddress:
         return "invalid data", 400
-
-    data = {"node_address", request.host_url}
+    #print("************* register_with_existing_node *****************")
+    data = {"node_address": request.host_url}
     headers = {'Content-Type': "application/json"}
+    # print(json.dumps(data))
+    #print("************* end register_with_existing_node *****************")
     response = requests.post(nodeAddress + "/register_node",
                              data=json.dumps(data), headers=headers)
     if response.status_code == 200:

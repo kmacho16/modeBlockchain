@@ -72,3 +72,43 @@ class StoreController(object):
         finally:
             blocks.close()
         return result
+
+    def getPeersStored(self):
+        peers = shelve.open(self.peersFile)
+        storedPeers = []
+        try:
+            if 'peers' in peers:
+                storedPeers = peers['peers']
+            else:
+                storedPeers = []
+        finally:
+            peers.close()
+        return storedPeers
+
+    def addPeersStored(self, mPeer):
+        peers = shelve.open(self.peersFile)
+        storedPeers = []
+        exist = False
+        try:
+            if 'peers' in peers:
+                storedPeers = peers['peers']
+            else:
+                storedPeers = []
+            for element in storedPeers:
+                if(element['node_address'] == mPeer['node_address']):
+                    exist = True
+            if not exist:
+                storedPeers.append(mPeer)
+                peers['peers'] = storedPeers
+        finally:
+            peers.close()
+        return storedPeers
+
+    def delPeersStored(self):
+        peers = shelve.open(self.peersFile)
+        try:
+            if 'peers' in peers:
+                del peers['pending']
+        finally:
+            peers.close()
+        return []

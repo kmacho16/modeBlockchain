@@ -79,10 +79,13 @@ def announce_new_block(block):
 def create_chain_from_dump(chain_dump):
     #blockchain = BlockChain()
     for idx, block_data in enumerate(chain_dump):
+        print("*************** BLOCK  *****************")
+        print(json.dumps(block_data))
+        print("*************** BLOCK END  *****************")
         block = Block(block_data["index"],
                       block_data["transactions"],
                       block_data["timestamp"],
-                      block_data["previous_hash"])
+                      block_data["previousHash"])
         proof = block_data['hash']
         if idx > 0:
             added = blockchain.addBlock(block, proof)

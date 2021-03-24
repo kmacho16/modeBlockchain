@@ -15,6 +15,7 @@ class Blockchain(StoreController):
         super(Blockchain, self).__init__(
             transactionFile, chainFile, peersFile)
         self.unconfirmedTransaction = self.getTransactionsStored()
+        self.peers = self.getPeersStored()
         self.chain = []
         self.createGenesisBlock()
 
