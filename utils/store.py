@@ -4,10 +4,11 @@ from model.block import Block
 
 class StoreController(object):
 
-    def __init__(self, transactionFile, chainFile, peersFile):
+    def __init__(self, transactionFile, chainFile, peersFile, peersTransactionsFile):
         self.transactionFile = ("data/%s" % transactionFile)
         self.chainFile = ("data/%s" % chainFile)
         self.peersFile = ("data/%s" % peersFile)
+        self.peersTransactionsFile = ("data/%s" % peersTransactionsFile)
 
     def getTransactionsStored(self):
         transactions = shelve.open(self.transactionFile)
@@ -111,4 +112,44 @@ class StoreController(object):
                 del peers['pending']
         finally:
             peers.close()
+        return []
+
+    def getPeersTransactionStored(self):
+        peersTransaction = shelve.open(self.peersTransactionsFile)
+        storedPeersTransaction = []
+        try:
+            if 'peersTransaction' in peersTransaction:
+                storedPeersTransaction = peersTransaction['peersTransaction']
+            else:
+                storedPeersTransaction = []
+        finally:
+            peersTransaction.close()
+        return storedPeersTransaction
+
+    def addPeersTransactionStored(self, mPeer):
+        peersTransaction = shelve.open(self.peersTransactionsFile)
+        storedPeersTransaction = []
+        exist = False
+        try:
+            if 'peersTransaction' in peersTransaction:
+                storedPeersTransaction = peersTransaction['peersTransaction']
+            else:
+                storedPeersTransaction = []
+            for element in storedPeersTransaction:
+                if(element['node_address'] == mPeer['node_address']):
+                    exist = True
+            if not exist:
+                storedPeersTransaction.append(mPeer)
+                peersTransaction['peersTransaction'] = storedPeersTransaction
+        finally:
+            peersTransaction.close()
+        return storedPeersTransaction
+
+    def delPeersTransactionStored(self):
+        peersTransaction = shelve.open(self.peersTransactionsFile)
+        try:
+            if 'peersTransaction' in peersTransaction:
+                del peersTransaction['peersTransaction']
+        finally:
+            peersTransaction.close()
         return []

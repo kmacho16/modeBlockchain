@@ -6,14 +6,17 @@ from flask import Flask, jsonify, request
 import shelve
 from model.block import Block
 from utils.store import StoreController
+import random
+import math
+from requests.exceptions import ConnectionError
 
 
 class Blockchain(StoreController):
     difficulty = 2
 
-    def __init__(self, transactionFile='transactions.ud', chainFile='blocks.ud', peersFile='peers.ud'):
+    def __init__(self, transactionFile='transactions.ud', chainFile='blocks.ud', peersFile='peers.ud', peersTransactionsFile='peersTransaction.ud'):
         super(Blockchain, self).__init__(
-            transactionFile, chainFile, peersFile)
+            transactionFile, chainFile, peersFile, peersTransactionsFile)
         self.unconfirmedTransaction = self.getTransactionsStored()
         self.peers = self.getPeersStored()
         self.chain = []
@@ -37,11 +40,12 @@ class Blockchain(StoreController):
         return computedHash
 
     def addNewTransaction(self, transaction):
+        self.sendTransactionToPeers(transaction)
         self.addTransactionsStored(transaction)
         self.unconfirmedTransaction = self.getTransactionsStored()
 
     def mine(self):
-        if not self.unconfirmedTransaction:
+        '''if not self.unconfirmedTransaction:
             return False
         lastBlock = self.lastBlock
 
@@ -52,7 +56,30 @@ class Blockchain(StoreController):
         proof = self.proofOfWork(newBlock)
         self.addBlock(newBlock, proof)
         self.unconfirmedTransaction = self.delTransactionsStored()
-        return newBlock.index
+        return newBlock.index'''
+
+    def sendTransactionToPeers(self, transaction):
+        self.validatePeersTransactions()
+        try:
+            for peer in self.getPeersTransactionStored():
+                nodeAddress = peer['node_address']
+                headers = {'Content-Type': "application/json"}
+                requests.post(nodeAddress + "/new_transaction/peer",
+                              data=json.dumps(transaction), headers=headers)
+        except ConnectionError as e:
+            print("ERROR CONECTANDO %s ", e)
+
+    def validatePeersTransactions(self):
+        necessaryPeers = int(math.ceil(len(self.getPeersStored()) * 0.51))
+        if(necessaryPeers > len(self.getPeersTransactionStored())):
+            mContinue = True
+            while(mContinue):
+                randomPeer = random.choice(self.getPeersStored())
+                mContinue = False
+                for item in self.getPeersTransactionStored():
+                    if(item['node_address'] == randomPeer['node_address']):
+                        mContinue = True
+            self.addPeersTransactionStored(randomPeer)
 
     def addBlock(self, block, proof):
         previousHash = self.lastBlock.hash

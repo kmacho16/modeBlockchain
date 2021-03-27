@@ -2,11 +2,15 @@ import requests
 from flask import jsonify, request
 from model.block import Block
 from model.blockchain import Blockchain
+from model.concensus import Concensus
 import json
 from functools import wraps
 from raspi import Raspi
 import jwt
 from flask_bcrypt import Bcrypt
+import base64
+import hashlib
+from requests.exceptions import ConnectionError
 
 bcrypt = Bcrypt()
 
@@ -77,7 +81,7 @@ def announce_new_block(block):
 
 
 def create_chain_from_dump(chain_dump):
-    #blockchain = BlockChain()
+    # blockchain = BlockChain()
     for idx, block_data in enumerate(chain_dump):
         print("*************** BLOCK  *****************")
         print(json.dumps(block_data))
@@ -138,3 +142,54 @@ def token_required(f):
             return jsonify({'message': 'token is invalid'})
         return f(current_user, *args, **kwargs)
     return decorator
+
+
+def stringToHash(jsonString):
+    jsonString = jsonString.replace(" ", "").replace("\n", "")
+    return hashlib.md5(jsonString).hexdigest()
+
+
+def addVote(nodesList, pendinHash, nodeAddress=""):
+    voted = False
+    for node in nodesList:
+        if node.baseHash == pendinHash:
+            node.addVote()
+            voted = True
+    if(not voted):
+        nodesList.append(Concensus(nodeAddress, pendinHash, 1))
+    return nodesList
+
+
+def findBestNode(nodesList):
+    maxValue = 0
+    for index, node in enumerate(nodesList):
+        if(index == 0):
+            maxValue = node.votes
+        elif(node.votes > maxValue):
+            maxValue = node.votes
+            nodesList.remove(nodesList[index-1])
+        elif(node.votes < maxValue):
+            nodesList.remove(node)
+    return nodesList
+
+
+def validatePendingTransactionsPeers():
+    optionsList = []
+    jsonString = json.dumps(
+        blockchain.unconfirmedTransaction, sort_keys=True).encode()
+    mainTransactions = stringToHash(jsonString)
+    initNode = Concensus("main", mainTransactions, 1)
+    optionsList.append(initNode)
+    optionsList.append(Concensus("test", "XXXXX", 0))
+    try:
+        for peer in blockchain.getPeersTransactionStored():
+            nodeAddress = peer['node_address']
+            headers = {'Content-Type': "application/json"}
+            response = requests.get(
+                nodeAddress + "/pending_tx", headers=headers)
+            peerTransaction = stringToHash(response.text)
+            optionsList = addVote(optionsList, peerTransaction, nodeAddress)
+    except ConnectionError as e:
+        print("ERROR CONECTANDO %s " % e)
+    optionsList = findBestNode(optionsList)
+    return mainTransactions

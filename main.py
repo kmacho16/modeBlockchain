@@ -11,7 +11,7 @@ from model.peer import Peer
 from flask_cors import CORS
 import datetime
 from functools import wraps
-from utils.utils import create_chain_from_dump, activatePin, deactivatePin, addPeers, updatePeers, token_required, validateRecords, validateCredentials
+from utils.utils import create_chain_from_dump, activatePin, deactivatePin, addPeers, updatePeers, token_required, validateRecords, validateCredentials, validatePendingTransactionsPeers
 from flask_bcrypt import Bcrypt
 
 try:
@@ -37,6 +37,18 @@ def new_transaction():
     tx_data["timestamp"] = time.time()
     blockchain.addNewTransaction(tx_data)
     response = jsonify(username=tx_data["username"])
+    return response, 200
+
+
+@app.route('/new_transaction/peer', methods=['POST'])
+def newTransactionPeer():
+    tx_data = request.get_json()
+    required_fields = ["username"]
+    for field in required_fields:
+        if not tx_data.get(field):
+            return "Invalid transaction data", 404
+    blockchain.addNewTransaction(tx_data)
+    response = jsonify({'continue': True})
     return response, 200
 
 
@@ -122,9 +134,10 @@ def get_chain():
 
 @app.route('/mine', methods=['GET'])
 def mine_unconfirmed_transactions():
-    result = blockchain.mine()
+    result = validatePendingTransactionsPeers()
+    '''result = blockchain.mine()
     if not result:
-        return "No transactions to mine"
+        return "No transactions to mine"'''
     return "Block #{} is mined.".format(result)
 
 
