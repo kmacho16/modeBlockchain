@@ -45,7 +45,7 @@ class Blockchain(StoreController):
         self.unconfirmedTransaction = self.getTransactionsStored()
 
     def mine(self):
-        '''if not self.unconfirmedTransaction:
+        if not self.unconfirmedTransaction:
             return False
         lastBlock = self.lastBlock
 
@@ -56,7 +56,7 @@ class Blockchain(StoreController):
         proof = self.proofOfWork(newBlock)
         self.addBlock(newBlock, proof)
         self.unconfirmedTransaction = self.delTransactionsStored()
-        return newBlock.index'''
+        return newBlock.index
 
     def sendTransactionToPeers(self, transaction):
         self.validatePeersTransactions()
@@ -121,6 +121,10 @@ class Blockchain(StoreController):
     @property
     def lastBlock(self):
         return self.chain[-1]
+
+    @property
+    def firstBlock(self):
+        return self.chain[0]
 
     def checkChainValidity(self, chain):
         result = True

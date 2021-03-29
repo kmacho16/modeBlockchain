@@ -45,6 +45,14 @@ class StoreController(object):
             transactions.close()
         return []
 
+    def loadPredefinedTransaction(self, newFullTransaction):
+        transactions = shelve.open(self.transactionFile)
+        try:
+            transactions['pending'] = newFullTransaction
+        finally:
+            transactions.close()
+        return newFullTransaction
+
     def getBlockChain(self):
         blocks = shelve.open(self.chainFile)
         blockchain = None

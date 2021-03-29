@@ -156,7 +156,7 @@ def addVote(nodesList, pendinHash, nodeAddress=""):
             node.addVote()
             voted = True
     if(not voted):
-        nodesList.append(Concensus(nodeAddress, pendinHash, 1))
+        nodesList.append(Concensus(pendinHash, 1, nodeAddress))
     return nodesList
 
 
@@ -173,23 +173,44 @@ def findBestNode(nodesList):
     return nodesList
 
 
+def getTransactionFromMainServer(nodeAddress):
+    print("*************** getTransactionFromMainServer ***************")
+    print(blockchain.unconfirmedTransaction)
+    response = consumePendingTransaction(nodeAddress)
+    print(response.json)
+
+
+def consumePendingTransaction(nodeAddress):
+    headers = {'Content-Type': "application/json"}
+    response = requests.get(
+        nodeAddress + "/pending_tx", headers=headers)
+    return response
+
+
 def validatePendingTransactionsPeers():
     optionsList = []
     jsonString = json.dumps(
         blockchain.unconfirmedTransaction, sort_keys=True).encode()
     mainTransactions = stringToHash(jsonString)
-    initNode = Concensus("main", mainTransactions, 1)
+    initNode = Concensus(mainTransactions, 1)
     optionsList.append(initNode)
-    optionsList.append(Concensus("test", "XXXXX", 0))
+    optionsList.append(Concensus("XXXXX", 0, "test"))
     try:
         for peer in blockchain.getPeersTransactionStored():
             nodeAddress = peer['node_address']
-            headers = {'Content-Type': "application/json"}
-            response = requests.get(
-                nodeAddress + "/pending_tx", headers=headers)
+            response = consumePendingTransaction(nodeAddress)
             peerTransaction = stringToHash(response.text)
             optionsList = addVote(optionsList, peerTransaction, nodeAddress)
     except ConnectionError as e:
         print("ERROR CONECTANDO %s " % e)
     optionsList = findBestNode(optionsList)
-    return mainTransactions
+    if not optionsList[0].validateMain():
+        getTransactionFromMainServer(optionsList[0].nodeAddress)
+
+
+def encodeBase64(data):
+    return base64.b64encode(data)
+
+
+def decodeBase64(stringBase64):
+    return base64.b64decode(stringBase64)

@@ -11,7 +11,7 @@ from model.peer import Peer
 from flask_cors import CORS
 import datetime
 from functools import wraps
-from utils.utils import create_chain_from_dump, activatePin, deactivatePin, addPeers, updatePeers, token_required, validateRecords, validateCredentials, validatePendingTransactionsPeers
+from utils.utils import stringToHash, create_chain_from_dump, activatePin, deactivatePin, addPeers, updatePeers, token_required, validateRecords, validateCredentials, validatePendingTransactionsPeers
 from flask_bcrypt import Bcrypt
 
 try:
@@ -78,6 +78,11 @@ def login():
         return jsonify({'continue': False, 'message': 'Credenciales incorrectas o dispositivo no registrado'})
 
 
+'''@app.route('/mine/peers', methods=['POST'])
+    def minePeers():
+        authData = request.get_json()[""]'''
+
+
 @app.route('/get-data', methods=['GET'])
 @token_required
 def getData(current_user):
@@ -134,11 +139,19 @@ def get_chain():
 
 @app.route('/mine', methods=['GET'])
 def mine_unconfirmed_transactions():
-    result = validatePendingTransactionsPeers()
-    '''result = blockchain.mine()
+    validatePendingTransactionsPeers()
+    result = blockchain.mine()
     if not result:
-        return "No transactions to mine"'''
+        return "No transactions to mine"
     return "Block #{} is mined.".format(result)
+
+
+@app.route('/base/hash', methods=['GET'])
+def getBasehash():
+    blockchain = Blockchain()
+    auxString = "%s:%s" % (blockchain.firstBlock.hash,
+                           blockchain.lastBlock.hash)
+    return jsonify({"hash": stringToHash(auxString)})
 
 
 @app.route('/last/hash', methods=['GET'])
