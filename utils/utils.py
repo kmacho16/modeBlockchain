@@ -20,7 +20,7 @@ CONNECTED_NODE_ADDRESS = "http://127.0.0.1:8000"
 blockchain = Blockchain()
 
 
-yellowLed = Raspi(13, "LedPrincipal")
+yellowLed = Raspi(12, "LedPrincipal")
 otroLed = Raspi(4, "LedPrincipal")
 
 
