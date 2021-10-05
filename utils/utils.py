@@ -21,6 +21,7 @@ blockchain = Blockchain()
 
 
 yellowLed = Raspi(13, "LedPrincipal")
+otroLed = Raspi(4, "LedPrincipal")
 
 
 def consensus():
@@ -62,6 +63,7 @@ def fetch_posts():
 
 def activatePin():
     yellowLed.changeOutPin(True)
+    otroLed.changeOutPin(True)
     return ({"uuid": yellowLed.uuid,
              "name": yellowLed.name,
              "state": "activate"})
@@ -69,6 +71,8 @@ def activatePin():
 
 def deactivatePin():
     yellowLed.changeOutPin(False)
+    otroLed.changeOutPin(False)
+
     return ({"uuid": yellowLed.uuid,
              "name": yellowLed.name,
              "state": "deactivate"})
