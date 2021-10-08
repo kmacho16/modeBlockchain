@@ -20,7 +20,8 @@ CONNECTED_NODE_ADDRESS = "http://127.0.0.1:8000"
 blockchain = Blockchain()
 
 
-yellowLed = Raspi(12, "LedPrincipal")
+pin1 = Raspi(12, "Luz Puerta")
+pin2 = Raspi(6, "Puerta")
 
 
 def consensus():
@@ -60,18 +61,27 @@ def fetch_posts():
                        reverse=True)
 
 
-def activatePin():
-    yellowLed.changeOutPin(True)
-    return ({"uuid": yellowLed.uuid,
-             "name": yellowLed.name,
+def activatePin(pin):
+    pinAux = Raspi(0, "")
+    if pin == 1:
+        pinAux = pin1
+    else:
+        pinAux = pin2
+    pinAux.changeOutPin(True)
+    return ({"uuid": pinAux.uuid,
+             "name": pinAux.name,
              "state": "activate"})
 
 
-def deactivatePin():
-    yellowLed.changeOutPin(False)
-
-    return ({"uuid": yellowLed.uuid,
-             "name": yellowLed.name,
+def deactivatePin(pin):
+    pinAux = Raspi(0, "")
+    if pin == 1:
+        pinAux = pin1
+    else:
+        pinAux = pin2
+    pinAux.changeOutPin(False)
+    return ({"uuid": pinAux.uuid,
+             "name": pinAux.name,
              "state": "deactivate"})
 
 

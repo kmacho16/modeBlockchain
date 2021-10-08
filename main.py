@@ -89,14 +89,14 @@ def getData(current_user):
     return jsonify({'message': current_user})
 
 
-@app.route('/change_led_status/<int:status>', methods=['POST'])
+@app.route('/change_led_status/<int:pin>/<int:status>', methods=['POST'])
 @token_required
-def changeLedStatus(current_user, status):
+def changeLedStatus(current_user, pin, status):
     node, uid, username = current_user.split(":")
     if(status == 1):
-        action = activatePin()
+        action = activatePin(pin)
     else:
-        action = deactivatePin()
+        action = deactivatePin(pin)
     data = {"uid": uid, "username": username, "action": action}
     data["timestamp"] = time.time()
     blockchain.addNewTransaction(data)
