@@ -183,7 +183,11 @@ def register_new_peers():
     if not node:
         return "Invalid data", 400
     blockchain.addPeersStored(node)
-    return jsonify(blockchain.getPeersStored()), 200
+    chain_data = []
+    chain = blockchain.getBlockChain()
+    for block in chain:
+        chain_data.append(block.__dict__)
+    return jsonify({"peers": blockchain.getPeersStored(), "chain": chain_data}), 200
 
 
 @app.route("/peers", methods=['GET'])
